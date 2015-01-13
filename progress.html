@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>Progress Visualization Prototype Demo</title>
+  <link rel="stylesheet" href="progress.css">
+</head>
+<body>
+  <header>
+    <nav class='main-nav'>
+      <span class="logo"><img src="https://d37djvu3ytnwxt.cloudfront.net/static/images/logo-edX-77x36.png" alt="edX" title="edX" itemprop="url" height="30" width="64"></span>
+      <span class="provider">MITx:</span>
+      <span class="course">0.000x EDX Data Visualization</span>
+    </nav>
+  </header>
+  <div class="content">
+    <div class="card">
+      <h2 class="card-header">Progress</h2>
+      <div class="card-content">
+
+        <label for="selectgoal">Your Goal: </label>
+        <select name="goal" id="selectgoal">
+          <option value="certificate" selected>Get a certificate</option>
+          <option value="allvideos">Watch all videos</option>
+        </select>
+        <label for="selectcomparewith">Compare Yourself With: </label>
+        <select name="comparewith" id="selectcomparewith">
+          <option value="none">Nobody</option>
+          <option value="allpeers" selected>All peers</option>
+          <option value="toppeers">Top students</option>
+        </select>
+        
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="card-header">Leaderboard</h2>
+      <div class="card-content"></div>
+    </div>
+  </div>
+</body>
+</html>
