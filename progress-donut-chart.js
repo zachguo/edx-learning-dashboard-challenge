@@ -59,10 +59,10 @@
 
   // colored foreground arcs for visualize current progress
   var arcFG = d3.svg.arc()
-    .innerRadius(r - bandWidth)
-    .outerRadius(function(d) {
-      return r - (1 - d.data.val) * bandWidth;
-    });
+    .innerRadius(function(d) {
+      return r - d.data.val * bandWidth;
+    })
+    .outerRadius(r);
 
   arcs.append("path")
     .attr("class", "arc-fg")
