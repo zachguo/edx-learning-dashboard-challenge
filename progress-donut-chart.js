@@ -59,7 +59,18 @@
   arcs.append("text")
     .attr("transform", "translate(0,0)")
     .attr("text-anchor", "middle")
+    .attr("opacity", 0)
     .text(function(d) {
-      return d.data.name;
+      return d.data.name + ": " + d.data.val * 100 + "%";
     });
+
+  arcs.on("mouseover", function() {
+      var currentSelector = d3.select(this).attr("opacity", 0.8);
+      currentSelector.select("text").attr("opacity", 1);
+    })
+    .on("mouseout", function() {
+      var currentSelector = d3.select(this).attr("opacity", 1);
+      currentSelector.select("text").attr("opacity", 0);
+    });
+
 })();
