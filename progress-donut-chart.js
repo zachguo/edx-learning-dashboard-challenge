@@ -29,10 +29,10 @@
     bandWidth = r / 4;
 
   var svg = selector.append("svg")
-    .attr("width", '100%')
-    .attr("height", '100%')
-    .attr('viewBox', '0 0 ' + svgSide + ' ' + svgSide)
-    .attr('preserveAspectRatio', 'xMinYMin');
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", "0 0 " + svgSide + " " + svgSide)
+    .attr("preserveAspectRatio", "xMinYMin");
 
   var group = svg.append("g")
     .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
