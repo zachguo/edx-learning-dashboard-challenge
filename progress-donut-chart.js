@@ -23,13 +23,16 @@
     val: 0
   }];
   // non-responsive chart first
-  var r = 200,
-    bandWidth = 50,
-    svgSide = 450;
+  var selector = d3.select("#progress"),
+    svgSide = selector[0][0].offsetWidth,
+    r = svgSide * 4 / 9,
+    bandWidth = r / 4;
 
-  var svg = d3.select("#progress").append("svg")
-    .attr("width", svgSide)
-    .attr("height", svgSide);
+  var svg = selector.append("svg")
+    .attr("width", '100%')
+    .attr("height", '100%')
+    .attr('viewBox', '0 0 ' + svgSide + ' ' + svgSide)
+    .attr('preserveAspectRatio', 'xMinYMin');
 
   var group = svg.append("g")
     .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
