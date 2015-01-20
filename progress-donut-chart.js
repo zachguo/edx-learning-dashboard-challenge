@@ -75,12 +75,12 @@
       return d.data.name + ": " + d.data.val * 100 + "%";
     });
 
-  arcs.on("mouseover", function() {
-      var currentSelector = d3.select(this).attr("opacity", 0.8);
+  arcs.selectAll("path").on("mouseover", function() {
+      var currentSelector = d3.select(this.parentNode).attr("opacity", 0.8);
       currentSelector.select("text").attr("opacity", 1);
     })
     .on("mouseout", function() {
-      var currentSelector = d3.select(this).attr("opacity", 1);
+      var currentSelector = d3.select(this.parentNode).attr("opacity", 1);
       currentSelector.select("text").attr("opacity", 0);
     });
 
