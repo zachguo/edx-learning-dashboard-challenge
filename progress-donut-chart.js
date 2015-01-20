@@ -37,9 +37,15 @@
   var group = svg.append("g")
     .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
 
-  var arc = d3.svg.arc()
+  var arcBG = d3.svg.arc()
     .innerRadius(r - bandWidth)
     .outerRadius(r);
+
+  var arcFG = d3.svg.arc()
+    .innerRadius(r - bandWidth)
+    .outerRadius(function(d) {
+      return r - (1 - d.data.val) * bandWidth;
+    });
 
   var pie = d3.layout.pie()
     .sort(null)
@@ -54,7 +60,12 @@
     .attr("class", "arc");
 
   arcs.append("path")
-    .attr("d", arc);
+    .attr("class", "arc-bg")
+    .attr("d", arcBG);
+
+  arcs.append("path")
+    .attr("class", "arc-fg")
+    .attr("d", arcFG);
 
   arcs.append("text")
     .attr("transform", "translate(0,0)")
