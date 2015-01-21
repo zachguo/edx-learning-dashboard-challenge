@@ -1,72 +1,81 @@
 (function() {
   // fake data
   var datasource = {
-    all: [{
-      parent: "overall",
+    overall: [{
+      current: "overall",
       name: "week1",
       val: 0.95
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week2",
       val: 1
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week3",
       val: 0.55
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week4",
       val: 0.95
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week5",
       val: 0.45
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week6",
       val: 0
     }, {
-      parent: "overall",
+      current: "overall",
       name: "week7",
       val: 0
     }],
     week1: [{
-      parent: "week1",
+      current: "week1",
+      parent: "overall",
       name: "lecture1",
       val: 1
     }, {
-      parent: "week1",
+      current: "week1",
+      parent: "overall",
       name: "lecture2",
       val: 0.9
     }],
     week2: [{
-      parent: "week2",
+      current: "week2",
+      parent: "overall",
       name: "lecture3",
       val: 1
     }, {
-      parent: "week2",
+      current: "week2",
+      parent: "overall",
       name: "lecture4",
       val: 1
     }],
     week3: [{
-      parent: "week3",
+      current: "week3",
+      parent: "overall",
       name: "lecture5",
       val: 0.4
     }, {
-      parent: "week3",
+      current: "week3",
+      parent: "overall",
       name: "lecture6",
       val: 0.7
     }],
     lecture1: [{
-      parent: "lecture1",
+      current: "lecture1",
+      parent: "week1",
       name: "v1",
       val: 1
     }, {
-      parent: "lecture1",
+      current: "lecture1",
+      parent: "week1",
       name: "v2",
       val: 1
     }, {
-      parent: "lecture1",
+      current: "lecture1",
+      parent: "week1",
       name: "v3",
       val: 1
     }]
@@ -94,14 +103,26 @@
   var defaultreport = group.append("text")
     .attr("text-anchor", "middle");
 
-  update(datasource.all);
+  var backgroup = group.append("g");
+
+  backgroup.append("circle")
+    .attr("r", r - bandWidth * 1.2)
+    .attr("opacity", "0");
+
+  var backtext = backgroup.append("text")
+    .attr("transform", "translate(0," + (bandWidth * 2 - r) + ")")
+    .attr("text-anchor", "middle")
+    .attr("opacity", 0)
+    .text("click to go back");
+
+  update(datasource.overall);
 
   function update(data) {
     // generate default report
     if (data[0]) {
       defaultreport
       // .attr("opacity", 1)
-        .text(generateReport(data[0].parent, 1));
+        .text(generateReport(data[0].current, 1));
     }
 
     var arcs = group.selectAll(".arc")
@@ -163,7 +184,25 @@
         }
       });
 
-    // TODO zoom out (a back-to-parent button in text report?)
+    backgroup
+      // show help text for going back when hovering inner circle
+      .on("mouseover", function() {
+        backtext.attr("opacity", "0.3");
+      })
+      .on("mouseout", function() {
+        backtext.attr("opacity", "0");
+      })
+      // zoom out when clicking inner circle
+      .on("click", function() {
+        var parent = datasource[data[0].parent];
+        if (parent) {
+          update([]);
+          update(parent);
+        } else {
+          return;
+        }
+      });
+
     // TODO transition
 
   }
