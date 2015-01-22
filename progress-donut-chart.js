@@ -1,6 +1,6 @@
 (function() {
   // fake data
-  var datasource = {
+  var studentData = {
     overall: [{
       current: "overall",
       name: "week1",
@@ -86,7 +86,7 @@
     r = svgSide * 4 / 9,
     bandWidth = r / 4;
 
-  var group = selector.append("svg")
+  var rootG = selector.append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
     .attr("viewBox", "0 0 " + svgSide + " " + svgSide)
@@ -95,37 +95,36 @@
     .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
 
   var pie = d3.layout.pie()
-    .sort(null)
     .value(function(d) {
       return 1; // equally segmented
     });
 
-  var defaultreport = group.append("text")
+  var defaultReport = rootG.append("text")
     .attr("text-anchor", "middle");
 
-  var backgroup = group.append("g");
+  var backG = rootG.append("g");
 
-  backgroup.append("circle")
+  backG.append("circle")
     .attr("r", r - bandWidth * 1.2)
-    .attr("opacity", "0");
+    .attr("opacity", 0);
 
-  var backtext = backgroup.append("text")
+  var helpText = backG.append("text")
     .attr("transform", "translate(0," + (bandWidth * 2 - r) + ")")
     .attr("text-anchor", "middle")
     .attr("opacity", 0)
     .text("click to go back");
 
-  update(datasource.overall);
+  render(studentData.overall);
 
-  function update(data) {
+  function render(data) {
     // generate default report
     if (data[0]) {
-      defaultreport
+      defaultReport
       // .attr("opacity", 1)
         .text(generateReport(data[0].current, 1));
     }
 
-    var arcs = group.selectAll(".arc")
+    var arcs = rootG.selectAll(".arc")
       .data(pie(data)); // get angles from pie layout
 
     arcs.enter()
@@ -164,51 +163,67 @@
     arcs.selectAll("path")
       // show corresponding text & highlight hovered arc when hovering an arc
       .on("mouseover", function() {
-        var currentSelector = d3.select(this.parentNode).attr("opacity", 0.8);
-        defaultreport.attr("opacity", 0);
-        currentSelector.select("text").attr("opacity", 1);
+        arcHover(this, 0.5, 0, 1);
       })
       .on("mouseout", function() {
-        var currentSelector = d3.select(this.parentNode).attr("opacity", 1);
-        defaultreport.attr("opacity", 1);
-        currentSelector.select("text").attr("opacity", 0);
+        arcHover(this, 1, 1, 0);
       })
       // zoom in when clicking an arc
       .on("click", function(d) {
-        var child = datasource[d.data.name];
-        if (child) {
-          update([]);
-          update(child);
-        } else {
-          return;
-        }
+        checkThenRun(d.data.name)(update);
       });
 
-    backgroup
-      // show help text for going back when hovering inner circle
+    backG
+      // show help text for going back when hovering inner circle and being able to go back
       .on("mouseover", function() {
-        backtext.attr("opacity", "0.3");
+        checkThenRun(data[0].parent)(showHelpText);
       })
-      .on("mouseout", function() {
-        backtext.attr("opacity", "0");
-      })
+      .on("mouseout", hideHelpText)
       // zoom out when clicking inner circle
       .on("click", function() {
-        var parent = datasource[data[0].parent];
-        if (parent) {
-          update([]);
-          update(parent);
-        } else {
-          return;
-        }
+        checkThenRun(data[0].parent)(update);
       });
 
     // TODO transition
 
   }
 
+  function checkThenRun(label) {
+    // if label in studentData then run next function else do nothing
+    var newData = studentData[label];
+    if (newData) {
+      return function(nextstep) {
+        return nextstep(newData, label);
+      };
+    } else {
+      return function(nextstep) {};
+    }
+  }
+
+  function update(newData, label) {
+    render([]); // clean previous data to avoid data collision
+    render(newData);
+    if (label === "overall") {
+      hideHelpText();
+    }
+  }
+
   function generateReport(label, val) {
     return label + ": " + val * 100 + "%";
+  }
+
+  function arcHover(arcNode, opacityArc, opacityDefaultReport, opacityArcReport) {
+    var currentSelector = d3.select(arcNode.parentNode).attr("opacity", opacityArc);
+    defaultReport.attr("opacity", opacityDefaultReport);
+    currentSelector.select("text").attr("opacity", opacityArcReport);
+  }
+
+  function hideHelpText() {
+    return helpText.attr("opacity", 0);
+  }
+
+  function showHelpText() {
+    return helpText.attr("opacity", 0.5);
   }
 
 })();
