@@ -1,84 +1,38 @@
 (function() {
   // fake data
-  var studentData = {
-    overall: [{
-      current: "overall",
-      name: "week1",
-      val: 0.95
-    }, {
-      current: "overall",
-      name: "week2",
-      val: 1
-    }, {
-      current: "overall",
-      name: "week3",
-      val: 0.55
-    }, {
-      current: "overall",
-      name: "week4",
-      val: 0.95
-    }, {
-      current: "overall",
-      name: "week5",
-      val: 0.45
-    }, {
-      current: "overall",
-      name: "week6",
-      val: 0
-    }, {
-      current: "overall",
-      name: "week7",
-      val: 0
-    }],
-    week1: [{
-      current: "week1",
-      parent: "overall",
-      name: "lecture1",
-      val: 1
-    }, {
-      current: "week1",
-      parent: "overall",
-      name: "lecture2",
-      val: 0.9
-    }],
-    week2: [{
-      current: "week2",
-      parent: "overall",
-      name: "lecture3",
-      val: 1
-    }, {
-      current: "week2",
-      parent: "overall",
-      name: "lecture4",
-      val: 1
-    }],
-    week3: [{
-      current: "week3",
-      parent: "overall",
-      name: "lecture5",
-      val: 0.4
-    }, {
-      current: "week3",
-      parent: "overall",
-      name: "lecture6",
-      val: 0.7
-    }],
-    lecture1: [{
-      current: "lecture1",
-      parent: "week1",
-      name: "v1",
-      val: 1
-    }, {
-      current: "lecture1",
-      parent: "week1",
-      name: "v2",
-      val: 1
-    }, {
-      current: "lecture1",
-      parent: "week1",
-      name: "v3",
-      val: 1
-    }]
+  var courseStructure = {
+    children: {
+      overall: ["week1", "week2", "week3", "week4", "week5", "week6", "week7"],
+      week1: ["lecture1", "lecture2"],
+      lecture1: ["v1", "v2", "v3"]
+    },
+    parents: {
+      week1: "overall",
+      week2: "overall",
+      week3: "overall",
+      week4: "overall",
+      week5: "overall",
+      week6: "overall",
+      week7: "overall",
+      lecture1: "week1",
+      lecture2: "week1",
+      v1: "lecture1",
+      v2: "lecture1",
+      v3: "lecture1"
+    }
+  };
+
+  var avgProgress = {
+    overall: [1, 1, 0.8, 0.6, 0.4, 0.2, 0.1],
+    week1: [1, 1],
+    lecture1: [1, 1, 1],
+    lecture2: [1, 1, 1]
+  };
+
+  var studentProgress = {
+    overall: [0.95, 1, 0.55, 0.9, 0.45, 0, 0],
+    week1: [1, 0.9],
+    lecture1: [1, 1, 1]
   };
 
   var selector = d3.select("#progress"),
@@ -114,14 +68,18 @@
     .attr("opacity", 0)
     .text("click to go back");
 
-  render(studentData.overall);
+  render("overall");
 
-  function render(data) {
-    // generate default report
-    if (data[0]) {
-      defaultReport
-      // .attr("opacity", 1)
-        .text(generateReport(data[0].current, 1));
+  function render(label) {
+
+    var data = studentProgress[label];
+    var parentLabel = courseStructure.parents[label];
+
+    // if data is array then generate default report, else then clear chart
+    if (data && data.constructor === Array) {
+      defaultReport.text(generateReport(label, getAverage(studentProgress[label])));
+    } else {
+      data = [];
     }
 
     var arcs = rootG.selectAll(".arc")
@@ -143,7 +101,7 @@
     // colored foreground arcs for visualize current progress
     var arcFG = d3.svg.arc()
       .innerRadius(function(d) {
-        return r - d.data.val * bandWidth;
+        return r - d.data * bandWidth;
       })
       .outerRadius(r);
 
@@ -154,58 +112,64 @@
     arcs.append("text")
       .attr("text-anchor", "middle")
       .attr("opacity", 0)
-      .text(function(d) {
-        return generateReport(d.data.name, d.data.val);
+      .text(function(d, i) {
+        return generateReport(courseStructure.children[label][i], d.data);
       });
 
     arcs.exit().remove();
 
+    // show corresponding text & highlight hovered arc when hovering an arc *path*
     arcs.selectAll("path")
-      // show corresponding text & highlight hovered arc when hovering an arc
       .on("mouseover", function() {
         arcHover(this, 0.5, 0, 1);
       })
       .on("mouseout", function() {
         arcHover(this, 1, 1, 0);
-      })
-      // zoom in when clicking an arc
-      .on("click", function(d) {
-        checkThenRun(d.data.name)(update);
       });
 
-    backG
-      // show help text for going back when hovering inner circle and being able to go back
-      .on("mouseover", function() {
-        checkThenRun(data[0].parent)(showHelpText);
+    // zoom in when clicking an arc
+    arcs.on("click", function(d, i) {
+      checkThenRun(courseStructure.children[label][i])(update);
+    });
+
+    // show help text for going back when hovering inner circle and being able to go back
+    backG.on("mouseover", function() {
+        checkThenRun(parentLabel)(showHelpText);
       })
-      .on("mouseout", hideHelpText)
-      // zoom out when clicking inner circle
-      .on("click", function() {
-        checkThenRun(data[0].parent)(update);
-      });
+      .on("mouseout", hideHelpText);
+
+    // zoom out when clicking inner circle
+    backG.on("click", function() {
+      checkThenRun(parentLabel)(update);
+    });
 
     // TODO transition
 
   }
 
   function checkThenRun(label) {
-    // if label in studentData then run next function else do nothing
-    var newData = studentData[label];
-    if (newData) {
+    // if label in studentProgress then run next function else do nothing
+    if (label in studentProgress) {
       return function(nextstep) {
-        return nextstep(newData, label);
+        return nextstep(label);
       };
     } else {
       return function(nextstep) {};
     }
   }
 
-  function update(newData, label) {
-    render([]); // clean previous data to avoid data collision
-    render(newData);
+  function update(label) {
+    render(null); // clean previous data to avoid data collision
+    render(label);
     if (label === "overall") {
       hideHelpText();
     }
+  }
+
+  function getAverage(array) {
+    return array.reduce(function(a, b) {
+      return a + b;
+    }) / array.length;
   }
 
   function generateReport(label, val) {
