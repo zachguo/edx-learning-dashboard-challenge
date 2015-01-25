@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Progress Visualization Prototype Demo</title>
+  <title>EdX Learning Dashboard Challenge Prototype Demo</title>
   <link rel="stylesheet" href="progress.css">
   <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="load-data.js"></script>
 </head>
 
 <body>
@@ -15,30 +16,13 @@
         <img src="https://d37djvu3ytnwxt.cloudfront.net/static/images/logo-edX-77x36.png" alt="edX" title="edX" itemprop="url" height="30" width="64">
       </span>
       <span class="provider">MITx:</span>
-      <span class="course">0.000x EDX Data Visualization</span>
+      <span class="course">0.000x EdX Learning Dashboard Challenge</span>
     </nav>
   </header>
   <div class="content">
     <div class="card">
       <h2 class="card-header">Progress</h2>
       <div class="card-content" id="progress">
-
-        <div class="chart-options">
-          <label for="selectgoal">Your Goal: </label>
-          <select name="goal">
-            <option value="certificate" selected>Get a certificate</option>
-            <option value="allvideos">Watch all videos</option>
-          </select>
-        </div>
-        <div class="chart-options">
-          <label for="selectcomparewith">Compare Yourself With: </label>
-          <select name="comparewith">
-            <option value="none">Nobody</option>
-            <option value="allpeers" selected>All peers</option>
-            <option value="toppeers">Top students</option>
-          </select>
-        </div>
-
         <script src="progress-donut-chart.js"></script>
       </div>
     </div>

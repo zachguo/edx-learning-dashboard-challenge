@@ -72,13 +72,13 @@ header
 // content
 .content
   center(1180px)
-  +below(768px)
+  +below(800px)
     center(600px)
   margin-top 100px
 
 .card
   col(1/2)
-  +below(768px)
+  +below(800px)
     stack()
   border-radius 5px
   background-color color-bg-card
@@ -96,10 +96,14 @@ header
 
 // progress donut chart
 #progress
-  svg, .chart-options
+  svg
     center()
   *
     unselectable()
+    cursor pointer
+  text
+    text-anchor middle
+    dominant-baseline middle
 
 .arc-bg
   stroke color-bg-card
@@ -107,3 +111,17 @@ header
 
 .arc-fg
   fill color-primary
+
+.arc-comparison
+  stroke color-bg-card
+
+.report-title
+  font-size 22px
+  fill color-text-content
+
+.percentage-both
+  font-size 52px
+  fill color-primary
+
+.percentage-exercise, .percentage-video
+  fill color-text-content
