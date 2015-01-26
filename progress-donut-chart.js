@@ -44,7 +44,7 @@
     .attr("r", r - bandWidth)
     .attr("opacity", 0);
   var helpText = backG.append("text")
-    .attr("transform", "translate(0," + (-bandWidth * 2) + ")")
+    .attr("transform", "translate(0," + (-bandWidth * 2.5) + ")")
     .attr("opacity", 0)
     .text("<");
 
@@ -58,6 +58,9 @@
     var report = studentData.report[label];
     var reportAvg = avgData.report[label];
 
+    var durationNormal = 1000;
+    var durationShort = durationNormal / 2;
+
     // if donut is array then generate default report, else then clear chart
     if (donut && donut.constructor === Array) {
       // remove old report
@@ -70,23 +73,24 @@
       // default report - percentage (for both exercise and video)
       defaultReportG.append("text")
         .attr("class", "percentage-both")
-        .text(valToPercentString(report[0]));
+        .call(percentageAnimated, report[0]);
       // default report - percentage (for exercise)
       defaultReportG.append("text")
-        .attr("transform", "translate(" + (-bandWidth * 2) + ",0)")
         .attr("class", "percentage-exercise")
-        .text(valToPercentString(report[1]));
+        .text(valToPercentString(report[1]))
+        .call(slideOut, (-bandWidth * 2) + ",0");
       // default report - percentage (for video)
       defaultReportG.append("text")
-        .attr("transform", "translate(" + bandWidth * 2 + ",0)")
         .attr("class", "percentage-video")
-        .text(valToPercentString(report[2]));
+        .text(valToPercentString(report[2]))
+        .call(slideOut, bandWidth * 2 + ",0");
       // default report - peer comparison
       var diff = report[0] - reportAvg[0];
       defaultReportG.append("text")
-        .attr("transform", "translate(0," + bandWidth * 1.5 + ")")
+        .attr("class", "report-comparison")
         .text(generateComparisonText(diff))
-        .attr("fill", color(diff));
+        .attr("fill", color(diff))
+        .call(slideOut, "0," + bandWidth * 1.5);
     } else {
       donut = [];
     }
@@ -114,7 +118,20 @@
       .outerRadius(r);
     arcs.append("path")
       .attr("class", "arc-fg")
-      .attr("d", arcFG);
+      // foreground arcs transite from outerRadius to innerRadius
+      .attr("d", d3.svg.arc()
+        .innerRadius(r)
+        .outerRadius(r))
+      .transition()
+      .duration(durationNormal)
+      .attrTween("d", function(d) {
+        var dStart = JSON.parse(JSON.stringify(d));
+        d.data = 0;
+        var i = d3.interpolateObject(d, dStart);
+        return function(t) {
+          return arcFG(i(t));
+        };
+      });
 
     // colored outer arcs for peer comparison
     var arcComparison = d3.svg.arc()
@@ -130,23 +147,22 @@
 
     // arc report
     arcs.append("text")
-      .attr("transform", "translate(0," + (-bandWidth * 1.5) + ")")
-      .attr("opacity", 0)
+      .call(hideToArcCentroid)
       .attr("class", "report-title")
       .text(function(d, i) {
         return structure.getChildren(label)[i].toUpperCase();
       });
     // arc report - percentage
     arcs.append("text")
+      .call(hideToArcCentroid) //"translate(0,0)"
       .attr("class", "percentage-both")
-      .attr("opacity", 0)
       .text(function(d) {
         return valToPercentString(d.data);
       });
     // arc report - peer comparison
     arcs.append("text")
-      .attr("transform", "translate(0," + bandWidth * 1.5 + ")")
-      .attr("opacity", 0)
+      .call(hideToArcCentroid)
+      .attr("class", "report-comparison")
       .attr("fill", function(d, i) {
         return color(d.data - donutAvg[i]);
       })
@@ -158,13 +174,20 @@
     arcs.exit().remove();
 
     // show corresponding report & highlight hovered arc when hovering an arc *path*
-    arcs.selectAll("path")
+    arcs
       .on("mouseover", function() {
         arcHover(this, 0.9, 0, 1);
       })
       .on("mouseout", function() {
         arcHover(this, 1, 1, 0);
       });
+
+    // postpone mouseover events after default-report transition
+    arcs.attr('pointer-events', 'none')
+      .transition()
+      .duration(durationNormal * 2 + durationShort)
+      .transition()
+      .attr('pointer-events', 'auto');
 
     // zoom in when clicking an arc
     arcs.on("click", function(d, i) {
@@ -182,7 +205,68 @@
       structure.checkThenRun(structure.getParent(label))(update);
     });
 
-    // TODO transition
+    // animation helpers
+    function percentageAnimated(selection, val) {
+      selection.text("0%")
+        .transition()
+        .duration(durationNormal)
+        .tween("text", function() {
+          var i = d3.interpolate(0, val);
+          return function(t) {
+            this.textContent = valToPercentString(i(t));
+          };
+        });
+    }
+
+    function slideOut(selection, translation) {
+      selection.attr("opacity", 0)
+        .transition()
+        .delay(durationNormal)
+        .duration(durationNormal)
+        .attr("transform", "translate(" + translation + ")")
+        .attr("opacity", 1);
+    }
+
+    function hideToArcCentroid(selection) {
+      selection.attr("transform", function(d) {
+          var xy = arcBG.centroid(d);
+          return "translate(" + xy[0] + "," + xy[1] + ") " + "scale(0.1)";
+        })
+        .attr("opacity", 0);
+    }
+
+    function hideToArcCentroidAnimated(selection) {
+      selection.transition()
+        .duration(durationShort)
+        .call(hideToArcCentroid);
+    }
+
+    function showArcReport(selection, translation) {
+      selection.transition()
+        .duration(durationShort)
+        .attr("transform", "translate(" + translation + ") " + "scale(1)")
+        .attr("opacity", 1);
+    }
+
+    function arcHover(arcNode, opacityArc, opacityDefaultReport, opacityArcReport) {
+      var currentSelector = d3.select(arcNode).attr("opacity", opacityArc);
+      currentSelector.select(".arc-comparison").attr("opacity", opacityArcReport);
+      defaultReportG.selectAll("text")
+        .transition()
+        .duration(durationShort)
+        .attr("opacity", opacityDefaultReport);
+      if (opacityArcReport === 1) {
+        currentSelector.select(".report-title")
+          .call(showArcReport, "0," + (bandWidth * -1.5));
+        currentSelector.select(".report-comparison")
+          .call(showArcReport, "0," + (bandWidth * 1.5));
+        currentSelector.select(".percentage-both")
+          .call(showArcReport, "0,0");
+      } else {
+        currentSelector.selectAll("text")
+          .call(hideToArcCentroidAnimated);
+      }
+    }
 
   }
 
@@ -195,27 +279,20 @@
     }
   }
 
-  function valToPercentString(val) {
-    return Math.abs(Math.floor(val * 100)) + "%";
-  }
-
-  function generateComparisonText(val) {
-    return val >= 0 ? valToPercentString(val) + " ahead of peers" : valToPercentString(val) + " behind peers";
-  }
-
-  function arcHover(arcNode, opacityArc, opacityDefaultReport, opacityArcReport) {
-    var currentSelector = d3.select(arcNode.parentNode).attr("opacity", opacityArc);
-    defaultReportG.attr("opacity", opacityDefaultReport);
-    currentSelector.selectAll("text").attr("opacity", opacityArcReport);
-    currentSelector.select(".arc-comparison").attr("opacity", opacityArcReport);
-  }
-
   function hideHelpText() {
     return helpText.attr("opacity", 0);
   }
 
   function showHelpText() {
     return helpText.attr("opacity", 0.2);
+  }
+
+  function valToPercentString(val) {
+    return Math.abs(Math.floor(val * 100)) + "%";
+  }
+
+  function generateComparisonText(val) {
+    return val >= 0 ? valToPercentString(val) + " ahead of peers" : valToPercentString(val) + " behind peers";
   }
 
 })();
