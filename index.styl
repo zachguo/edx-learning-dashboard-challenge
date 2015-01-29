@@ -10,11 +10,12 @@ color-bg-card = #FFF
 color-text-title = #3C3C3C
 color-text-content = #666
 color-primary = #1D9DD9
+color-secondary = #BC2A6C
 color-success = #45D91D
 color-error = #D9321D
 
 // helpers
-border(suffix)
+addborder(suffix)
   border{suffix} 1px solid #AAA
 
 boxshadow()
@@ -27,6 +28,11 @@ unselectable()
   -moz-user-select none
   -ms-user-select none
   user-select none
+
+labeltext()
+  text-align center
+  font-size 16px
+  color color-text-content
 
 // main
 *
@@ -44,7 +50,7 @@ header
   padding 10px
   background-color color-bg-card
   overflow hidden
-  border('-bottom')
+  addborder('-bottom')
   boxshadow()
 
 .main-nav
@@ -60,7 +66,7 @@ header
 
 .provider
   padding-left 15px
-  border('-left')
+  addborder('-left')
   color color-text-title
   font-weight bold
   vertical-align text-bottom
@@ -82,17 +88,28 @@ header
     stack()
   border-radius 5px
   background-color color-bg-card
-  border('')
+  addborder('')
   boxshadow()
   padding 10px
 
 .card-header
-  border('-bottom')
+  addborder('-bottom')
   color color-text-title
   font-weight 300
 
 .card-content
   color color-text-content
+
+.chart-options
+  center()
+  labeltext()
+  select
+    labeltext()
+    border none
+    addborder('-bottom')
+    appearance none
+    -webkit-appearance none
+    -moz-appearance none
 
 // progress donut chart
 #progress
@@ -109,9 +126,6 @@ header
   stroke color-bg-card
   fill color-bg-edx
 
-.arc-fg
-  fill color-primary
-
 .arc-comparison
   stroke color-bg-card
 
@@ -119,9 +133,11 @@ header
   font-size 22px
   fill color-text-content
 
-.percentage-both
+.percentage
   font-size 52px
+
+.category-problem
   fill color-primary
 
-.percentage-exercise, .percentage-video
-  fill color-text-content
+.category-video
+  fill color-secondary

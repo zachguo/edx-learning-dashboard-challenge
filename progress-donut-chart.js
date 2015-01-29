@@ -1,9 +1,49 @@
 (function() {
 
+  // data visualization (*no data manipulation* in codes below)
+  // build up skeleton for rendering
+  var selector = d3.select("#progress"),
+    svgSide = selector[0][0].offsetWidth,
+    r = svgSide * 4 / 9,
+    bandWidth = r / 4;
+
+  // init responsive svg
+  var rootG = selector.append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", "0 0 " + svgSide + " " + svgSide)
+    .attr("preserveAspectRatio", "xMinYMin")
+    .append("g")
+    .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
+
+  // init an equally segmented pie layout
+  var pie = d3.layout.pie()
+    .value(function() {
+      return 1;
+    });
+
+  // color scale for peer comparison
+  var color = d3.scale.linear()
+    .domain([-1, 0, 1])
+    .range(["#D9321D", "#FFF", "#45D91D"]);
+
+  // init default report group
+  var defaultReportG = rootG.append("g")
+    .attr("class", "default-report");
+
+  // clickable area and help text for going back
+  var backG = rootG.append("g")
+    .attr("class", "go-back");
+  backG.append("circle")
+    .attr("r", r - bandWidth)
+    .attr("opacity", 0);
+  var helpText = backG.append("text")
+    .attr("transform", "translate(0," + (-bandWidth * 2.5) + ")")
+    .attr("opacity", 0)
+    .text("<");
+
   d3.json("_courseStructure.json", function(structure) {
     d3.json("_students.json", function(data) {
-
-      var category = "video";
 
       // add some helper methods for data objects
       structure.getParent = function(label) {
@@ -25,58 +65,33 @@
         }
       };
 
+      data.IDs = Object.keys(data);
+
       data.getAvgData = function() {
-        return this.avg;
+        return this.avg[category];
       };
 
       data.getStudentData = function(id) {
-        return id ? this[id] : this[499];
+        return id ? this[id][category] : this[499][category];
       };
 
-      var studentData = data.getStudentData()[category];
-      var avgData = data.getAvgData()[category];
-
-      // data visualization (*no data manipulation* in codes below)
-      // build up skeleton for rendering
-      var selector = d3.select("#progress"),
-        svgSide = selector[0][0].offsetWidth,
-        r = svgSide * 4 / 9,
-        bandWidth = r / 4;
-
-      // init responsive svg
-      var rootG = selector.append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("viewBox", "0 0 " + svgSide + " " + svgSide)
-        .attr("preserveAspectRatio", "xMinYMin")
-        .append("g")
-        .attr("transform", "translate(" + svgSide / 2 + "," + svgSide / 2 + ")");
-
-      // init an equally segmented pie layout
-      var pie = d3.layout.pie()
-        .value(function() {
-          return 1;
+      // init selectbox for student
+      d3.select("#select-student")
+        .selectAll("option")
+        .data(data.IDs)
+        .enter()
+        .append("option")
+        .attr("value", function(d) {
+          return d;
+        })
+        .text(function(d) {
+          return d;
         });
 
-      // color scale for peer comparison
-      var color = d3.scale.linear()
-        .domain([-1, 0, 1])
-        .range(["#D9321D", "#FFF", "#45D91D"]);
-
-      // init default report group
-      var defaultReportG = rootG.append("g")
-        .attr("class", "default-report");
-
-      // clickable area and help text for going back
-      var backG = rootG.append("g")
-        .attr("class", "go-back");
-      backG.append("circle")
-        .attr("r", r - bandWidth)
-        .attr("opacity", 0);
-      var helpText = backG.append("text")
-        .attr("transform", "translate(0," + (-bandWidth * 2.5) + ")")
-        .attr("opacity", 0)
-        .text("<");
+      var category = d3.select("#select-category").property("value");
+      var student_id = d3.select("#select-student").property("value");
+      var studentData = data.getStudentData(student_id);
+      var avgData = data.getAvgData();
 
       // rendering starts from 'overall' level
       render("overall");
@@ -102,14 +117,15 @@
             .text(label.toUpperCase());
           // default report - percentage (for both exercise and video)
           defaultReportG.append("text")
-            .attr("class", "percentage-both")
+            .attr("class", "percentage")
+            .classed("category-" + category, true)
             .call(percentageAnimated, report);
           // default report - peer comparison
           var diff = report - reportAvg;
           defaultReportG.append("text")
             .attr("class", "report-comparison")
             .text(generateComparisonText(diff))
-            .attr("fill", color(diff))
+            .attr("fill", color(darkerRange(diff)))
             .call(slideOut, "0," + bandWidth * 1.5);
         } else {
           donut = [];
@@ -138,6 +154,7 @@
           .outerRadius(r);
         arcs.append("path")
           .attr("class", "arc-fg")
+          .classed("category-" + category, true)
           // foreground arcs transite from outerRadius to innerRadius
           .attr("d", d3.svg.arc()
             .innerRadius(r)
@@ -161,7 +178,7 @@
           .attr("class", "arc-comparison")
           .attr("opacity", 0)
           .attr("fill", function(d, i) {
-            return color(d.data - donutAvg[i]);
+            return color(darkerRange(d.data - donutAvg[i]));
           })
           .attr("d", arcComparison);
 
@@ -175,7 +192,8 @@
         // arc report - percentage
         arcs.append("text")
           .call(hideToArcCentroid) //"translate(0,0)"
-          .attr("class", "percentage-both")
+          .attr("class", "percentage")
+          .classed("category-" + category, true)
           .text(function(d) {
             return valToPercentString(d.data);
           });
@@ -184,7 +202,7 @@
           .call(hideToArcCentroid)
           .attr("class", "report-comparison")
           .attr("fill", function(d, i) {
-            return color(d.data - donutAvg[i]);
+            return color(darkerRange(d.data - donutAvg[i]));
           })
           .text(function(d, i) {
             return generateComparisonText(d.data - donutAvg[i]);
@@ -193,10 +211,24 @@
         // clear old data
         arcs.exit().remove();
 
+        // rerender when chart options change
+        d3.select("#select-category").on("change", function() {
+          category = this.value;
+          studentData = data.getStudentData(student_id);
+          avgData = data.getAvgData();
+          update(label);
+        });
+        d3.select("#select-student").on("change", function() {
+          student_id = this.value;
+          studentData = data.getStudentData(student_id);
+          avgData = data.getAvgData();
+          update(label);
+        });
+
         // show corresponding report & highlight hovered arc when hovering an arc *path*
         arcs
           .on("mouseover", function() {
-            arcHover(this, 0.9, 0, 1);
+            arcHover(this, 0.7, 0, 1);
           })
           .on("mouseout", function() {
             arcHover(this, 1, 1, 0);
@@ -205,7 +237,7 @@
         // postpone mouseover events after default-report transition
         arcs.attr('pointer-events', 'none')
           .transition()
-          .duration(durationNormal * 2 + durationShort)
+          .duration(durationNormal + durationShort * 1.5)
           .transition()
           .attr('pointer-events', 'auto');
 
@@ -242,7 +274,7 @@
           selection.attr("opacity", 0)
             .transition()
             .delay(durationNormal)
-            .duration(durationNormal)
+            .duration(durationShort)
             .attr("transform", "translate(" + translation + ")")
             .attr("opacity", 1);
         }
@@ -280,7 +312,7 @@
               .call(showArcReport, "0," + (bandWidth * -1.5));
             currentSelector.select(".report-comparison")
               .call(showArcReport, "0," + (bandWidth * 1.5));
-            currentSelector.select(".percentage-both")
+            currentSelector.select(".percentage")
               .call(showArcReport, "0,0");
           } else {
             currentSelector.selectAll("text")
@@ -313,6 +345,10 @@
 
       function generateComparisonText(val) {
         return val >= 0 ? valToPercentString(val) + " ahead of peers" : valToPercentString(val) + " behind peers";
+      }
+
+      function darkerRange(val) {
+        return val >= 0 ? val / 2 + 0.5 : val / 2 - 0.5;
       }
 
     });

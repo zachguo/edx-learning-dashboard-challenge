@@ -22,7 +22,15 @@
     <div class="card">
       <h2 class="card-header">Progress</h2>
       <div class="card-content" id="progress">
-        <script src="progress-donut-chart.js"></script>
+        <div class="chart-options">
+          <label for="category">Show </label>
+          <select name="category" id="select-category">
+            <option value="video" selected>video</option>
+            <option value="problem">problem</option>
+          </select>
+          <label for="student">progress for student </label>
+          <select name="student" id="select-student"></select>
+        </div>
       </div>
     </div>
     <div class="card">
@@ -30,6 +38,7 @@
       <div class="card-content"></div>
     </div>
   </div>
+  <script src="progress-donut-chart.js"></script>
 </body>
 
 </html>
