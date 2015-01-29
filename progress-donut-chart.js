@@ -3,18 +3,20 @@
   d3.json("_courseStructure.json", function(structure) {
     d3.json("_students.json", function(data) {
 
+      var category = "video";
+
       // add some helper methods for data objects
       structure.getParent = function(label) {
-        return this.parent[label];
+        return this[category].parent[label];
       };
 
       structure.getChildren = function(label) {
-        return this.children[label];
+        return this[category].children[label];
       };
 
       structure.checkThenRun = function(label) {
         // if label is a possible level, then run nextstep function, else then do nothing
-        if (label in this.children) {
+        if (label in this[category].children) {
           return function(nextstep) {
             return nextstep(label);
           };
@@ -28,11 +30,11 @@
       };
 
       data.getStudentData = function(id) {
-        return id ? this[id] : this[0];
+        return id ? this[id] : this[499];
       };
 
-      var studentData = data.getStudentData();
-      var avgData = data.getAvgData();
+      var studentData = data.getStudentData()[category];
+      var avgData = data.getAvgData()[category];
 
       // data visualization (*no data manipulation* in codes below)
       // build up skeleton for rendering
@@ -52,7 +54,7 @@
 
       // init an equally segmented pie layout
       var pie = d3.layout.pie()
-        .value(function(d) {
+        .value(function() {
           return 1;
         });
 
@@ -101,19 +103,9 @@
           // default report - percentage (for both exercise and video)
           defaultReportG.append("text")
             .attr("class", "percentage-both")
-            .call(percentageAnimated, report[0]);
-          // default report - percentage (for exercise)
-          defaultReportG.append("text")
-            .attr("class", "percentage-exercise")
-            .text(valToPercentString(report[1]))
-            .call(slideOut, (-bandWidth * 2) + ",0");
-          // default report - percentage (for video)
-          defaultReportG.append("text")
-            .attr("class", "percentage-video")
-            .text(valToPercentString(report[2]))
-            .call(slideOut, bandWidth * 2 + ",0");
+            .call(percentageAnimated, report);
           // default report - peer comparison
-          var diff = report[0] - reportAvg[0];
+          var diff = report - reportAvg;
           defaultReportG.append("text")
             .attr("class", "report-comparison")
             .text(generateComparisonText(diff))
