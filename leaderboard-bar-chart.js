@@ -1,112 +1,84 @@
 (function() {
 
-  var selector = d3.select("#leaderboard"),
-    width = selector[0][0].offsetWidth,
-    height = width / 2,
-    barWidth = width / 2,
-    barHeight = height / 10;
-
-  // init responsive svg
-  var svg = selector.append("svg")
+  // init table
+  var table = d3.select("#leaderboard")
+    .append("table")
     .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("viewBox", "0 0 " + width + " " + height)
-    .attr("preserveAspectRatio", "xMinYMin");
+    .attr("height", "100%");
 
   d3.json("_leaderboard.json", function(top10) {
 
-    d3.select("#select-top10")
-      .on("change", update);
+    render();
 
-    var label = d3.select("#select-top10").property("value");
+    // rerender when window-size or select-option changes
+    d3.select(window).on("resize", render);
+    d3.select("#leaderboard").on("change", render);
 
-    var scaler = d3.scale.linear()
-      .domain([0, top10[label][0].value])
-      .range([0, barWidth]);
+    function render() {
+      table.selectAll("*").remove();
 
-    var bars = svg.selectAll("g")
-      .data(top10[label]);
+      var width = table[0][0].offsetWidth,
+        rankWidth = width / 10,
+        nameWidth = rankWidth * 4,
+        barWidth = rankWidth * 5,
+        label = d3.select("#select-top10").property("value");
 
-    bars.enter()
-      .append("g")
-      .attr("transform", function(d, i) {
-        return "translate(" + barWidth + "," + i * barHeight + ")";
-      });
+      var rows = table.selectAll("tr")
+        .data(top10[label]);
 
-    // add bars
-    bars.append("rect")
-      .attr("width", 0)
-      .transition()
-      .duration(1000)
-      .attr("width", function(d) {
-        return scaler(d.value);
-      })
-      .attr("class", label)
-      .attr("height", barHeight - 2);
+      rows.enter().append("tr");
 
-    // add rank
-    bars.append("text")
-      .attr("class", "text-ranks")
-      .attr("x", -barWidth)
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d, i) {
-        return "#" + (i + 1);
-      });
+      // add ranks
+      rows.append("td")
+        .attr("class", "text-ranks")
+        .attr("width", rankWidth)
+        .text(function(d, i) {
+          return "#" + (i + 1);
+        });
 
-    // add student names
-    bars.append("text")
-      .attr("class", "text-student-names")
-      .attr("x", -barWidth * 4 / 5)
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(getStudentName);
+      // add student names
+      rows.append("td")
+        .attr("class", "text-student-names")
+        .attr("width", nameWidth)
+        .text(function(d) {
+          return "student-" + d.id;
+        });
 
-    // add score value
-    bars.append("text")
-      .attr("class", "text-scores")
-      .attr("x", 5)
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .attr("fill", "white")
-      .text(getScore);
-
-    bars.exit().remove();
-
-    function update() {
-      label = this.value;
-
+      // scaler for bars
       var scaler = d3.scale.linear()
         .domain([0, top10[label][0].value])
         .range([0, barWidth]);
 
-      svg.selectAll("rect")
-        .data(top10[label])
-        .attr("class", label)
-        .attr("width", 0)
+      // add bars
+      rows.append("td")
+        .attr("width", barWidth)
+        .attr("class", "text-scores")
+        .append("div")
+        .style("width", 0)
         .transition()
         .duration(1000)
-        .attr("width", function(d) {
-          return scaler(d.value);
+        .style("width", function(d) {
+          return scaler(d.value) + "px";
+        })
+        .attr("class", label)
+        .text(function(d) {
+          return reformatScoreByLabel(d.value, label);
         });
-
-      svg.selectAll(".text-student-names")
-        .data(top10[label])
-        .text(getStudentName);
-
-      svg.selectAll(".text-scores")
-        .data(top10[label])
-        .text(getScore);
-    }
-
-    function getStudentName(d) {
-      return "student-" + d.id;
-    }
-
-    function getScore(d) {
-      return d.value;
     }
 
   });
+
+  function reformatScoreByLabel(val, label) {
+    switch (label) {
+      case "top10_problem":
+        return (val * 100).toFixed(1) + "%";
+      case "top10_video":
+        return (val * 100).toFixed(1) + "%";
+      case "top10_active":
+        return val + "days";
+      case "top10_timespent":
+        return Math.round(val / 60) + "h" + (val % 60) + "min";
+    }
+  }
 
 })();
