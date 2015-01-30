@@ -379,7 +379,7 @@
       }
 
       function isPeerType(str) {
-        return isNaN(str) && !str.startsWith('get');
+        return isNaN(str) && str.indexOf('get') < 0;
       }
 
       function peerTypeToTitleText(peerType) {
