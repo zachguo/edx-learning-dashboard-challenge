@@ -65,20 +65,35 @@
         }
       };
 
-      data.IDs = Object.keys(data);
+      data.getIDs = function(filter) {
+        return Object.keys(this).filter(filter);
+      };
 
-      data.getAvgData = function() {
-        return this.avg[category];
+      data.getPeerData = function(peerType) {
+        return this[peerType][category];
       };
 
       data.getStudentData = function(id) {
         return id ? this[id][category] : this[499][category];
       };
 
-      // init selectbox for student
+      // init selectbox for student ID
       d3.select("#select-student")
         .selectAll("option")
-        .data(data.IDs)
+        .data(data.getIDs(isStudentID))
+        .enter()
+        .append("option")
+        .attr("value", function(d) {
+          return d;
+        })
+        .text(function(d) {
+          return "student-" + d;
+        });
+
+      // init selectbox for peer type
+      d3.select("#select-peer")
+        .selectAll("option")
+        .data(data.getIDs(isPeerType).sort())
         .enter()
         .append("option")
         .attr("value", function(d) {
@@ -89,9 +104,10 @@
         });
 
       var category = d3.select("#select-category").property("value");
-      var student_id = d3.select("#select-student").property("value");
-      var studentData = data.getStudentData(student_id);
-      var avgData = data.getAvgData();
+      var studentID = d3.select("#select-student").property("value");
+      var peerType = d3.select("#select-peer").property("value");
+      var studentData = data.getStudentData(studentID);
+      var peerData = data.getPeerData(peerType);
 
       // rendering starts from 'overall' level
       render("overall");
@@ -99,9 +115,9 @@
       function render(label) {
 
         var donut = studentData.donut[label];
-        var donutAvg = avgData.donut[label];
+        var donutAvg = peerData.donut[label];
         var report = studentData.report[label];
-        var reportAvg = avgData.report[label];
+        var reportAvg = peerData.report[label];
 
         var durationNormal = 1000;
         var durationShort = durationNormal / 2;
@@ -214,14 +230,20 @@
         // rerender when chart options change
         d3.select("#select-category").on("change", function() {
           category = this.value;
-          studentData = data.getStudentData(student_id);
-          avgData = data.getAvgData();
+          studentData = data.getStudentData(studentID);
+          peerData = data.getPeerData(peerType);
           update(label);
         });
         d3.select("#select-student").on("change", function() {
-          student_id = this.value;
-          studentData = data.getStudentData(student_id);
-          avgData = data.getAvgData();
+          studentID = this.value;
+          studentData = data.getStudentData(studentID);
+          peerData = data.getPeerData(peerType);
+          update(label);
+        });
+        d3.select("#select-peer").on("change", function() {
+          peerType = this.value;
+          studentData = data.getStudentData(studentID);
+          peerData = data.getPeerData(peerType);
           update(label);
         });
 
@@ -349,6 +371,14 @@
 
       function darkerRange(val) {
         return val >= 0 ? val / 2 + 0.5 : val / 2 - 0.5;
+      }
+
+      function isStudentID(str) {
+        return !isNaN(str);
+      }
+
+      function isPeerType(str) {
+        return isNaN(str) && !str.startsWith('get');
       }
 
     });
