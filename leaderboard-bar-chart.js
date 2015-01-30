@@ -52,7 +52,12 @@
       // add student names
       rows.append("td")
         .attr("class", "text-student-names")
+        .attr("width", 0)
+        .style("opacity", 0)
+        .transition()
+        .duration(500)
         .attr("width", nameWidth)
+        .style("opacity", 1)
         .text(function(d) {
           return "student-" + d.id;
         });
