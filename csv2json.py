@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# 1. This python script generates JSON data necessary for d3 visualization. Since all JSONs are already included in the repo, so there's no need to run this script.
+# 2. This is a dirty and one-time-use script containing few comments and many hacky steps. I didn't take efficiency and readability into account when writing it.
+
 import csv
 import json
 from collections import defaultdict
@@ -222,3 +225,5 @@ if __name__ == "__main__":
         json.dump(cs, fout)
     with open("_students.json", "w") as fout:
         json.dump(s, fout)
+    with open("_leaderboard.json", "w") as fout:
+        json.dump(top10, fout)

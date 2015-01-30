@@ -13,6 +13,7 @@ color-primary = #1D9DD9
 color-secondary = #BC2A6C
 color-success = #45D91D
 color-error = #D9321D
+color-warning = #FFCE54
 
 // helpers
 addborder(suffix)
@@ -90,7 +91,11 @@ header
   background-color color-bg-card
   addborder('')
   boxshadow()
-  padding 10px
+  padding 15px
+
+.card + .card
+  +below(800px)
+    margin-top 25px
 
 .card-header
   addborder('-bottom')
@@ -110,13 +115,15 @@ header
     appearance none
     -webkit-appearance none
     -moz-appearance none
+    unselectable()
+    cursor pointer
 
-// progress donut chart
+svg
+  center()
+  unselectable()
+
 #progress
   svg
-    center()
-  *
-    unselectable()
     cursor pointer
   text
     text-anchor middle
@@ -141,3 +148,18 @@ header
 
 .category-video
   fill color-secondary
+
+.text-student-names, .text-ranks
+  fill color-text-content
+
+.top10_problem
+  fill color-primary
+
+.top10_video
+  fill color-secondary
+
+.top10_active
+  fill color-success
+
+.top10_timespent
+  fill color-warning

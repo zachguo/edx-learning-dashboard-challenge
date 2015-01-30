@@ -1,6 +1,7 @@
 (function() {
 
-  // data visualization (*no data manipulation* in codes below)
+  // donut chart for visualizing student progress
+  // visualization codes only (*no data manipulation* in codes below)
   // build up skeleton for rendering
   var selector = d3.select("#progress"),
     svgSide = selector[0][0].offsetWidth,
