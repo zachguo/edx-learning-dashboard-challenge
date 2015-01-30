@@ -8,6 +8,19 @@
 
   d3.json("_leaderboard.json", function(top10) {
 
+    // init selectbox options
+    d3.select("#select-top10")
+      .selectAll("option")
+      .data(["top10_problem", "top10_video", "top10_active", "top10_timespent"])
+      .enter()
+      .append("option")
+      .attr("value", function(d) {
+        return d;
+      })
+      .text(function(d) {
+        return labelToTitleText(d);
+      });
+
     render();
 
     // rerender when window-size or select-option changes
@@ -78,6 +91,19 @@
         return val + "days";
       case "top10_timespent":
         return Math.round(val / 60) + "h" + (val % 60) + "min";
+    }
+  }
+
+  function labelToTitleText(label) {
+    switch (label) {
+      case "top10_problem":
+        return "10 students completed most problems";
+      case "top10_video":
+        return "10 students completed most videos";
+      case "top10_active":
+        return "10 most active students";
+      case "top10_timespent":
+        return "10 students spent most time";
     }
   }
 

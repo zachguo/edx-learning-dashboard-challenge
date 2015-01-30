@@ -19,33 +19,33 @@
     </nav>
   </header>
   <div class="content">
-    <div class="card">
-      <h2 class="card-header">Progress</h2>
-      <div class="card-content" id="progress">
-        <div class="chart-options">
-          <label for="category">Show </label>
-          <select name="category" id="select-category">
-            <option value="problem" selected>problem</option>
-            <option value="video">video</option>
-          </select>
-          <label for="student">progress for </label>
-          <select name="student" id="select-student"></select>
-          <label for="peers">, comparing with </label>
-          <select name="peers" id="select-peer"></select>
+    <div id="lcol">
+      <div class="card">
+        <h2 class="card-header">Progress</h2>
+        <div class="card-content" id="progress">
+          <div class="chart-options">
+            <label for="category">Show</label>
+            <select name="category" id="select-category">
+              <option value="problem" selected>problem</option>
+              <option value="video">video</option>
+            </select>
+            <label for="student"> progress for</label>
+            <select name="student" id="select-student"></select>
+            <label for="peers"> compared to</label>
+            <select name="peers" id="select-peer"></select>
+          </div>
         </div>
       </div>
     </div>
-    <div class="card">
-      <h2 class="card-header">Leaderboard</h2>
-      <div class="card-content" id="leaderboard">
-        <div class="chart-options">
-          <label for="top10">Show </label>
-          <select name="top10" id="select-top10">
-            <option value="top10_problem" selected>top10_problem</option>
-            <option value="top10_video">top10_video</option>
-            <option value="top10_active">top10_active</option>
-            <option value="top10_timespent">top10_timespent</option>
-          </select>
+    <div id="rcol">
+      <div class="card">
+        <h2 class="card-header">Leaderboard</h2>
+        <div class="card-content" id="leaderboard">
+          <div class="chart-options">
+            <label for="top10">Show</label>
+            <select name="top10" id="select-top10">
+            </select>
+          </div>
         </div>
       </div>
     </div>

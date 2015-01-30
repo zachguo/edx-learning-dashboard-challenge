@@ -101,7 +101,7 @@
           return d;
         })
         .text(function(d) {
-          return d;
+          return peerTypeToTitleText(d);
         });
 
       var category = d3.select("#select-category").property("value");
@@ -380,6 +380,21 @@
 
       function isPeerType(str) {
         return isNaN(str) && !str.startsWith('get');
+      }
+
+      function peerTypeToTitleText(peerType) {
+        switch (peerType) {
+          case "avg":
+            return "all peers";
+          case "top10_problem":
+            return "10 students completed most problems";
+          case "top10_video":
+            return "10 students completed most videos";
+          case "top10_active":
+            return "10 most active students";
+          case "top10_timespent":
+            return "10 students spent most time";
+        }
       }
 
     });

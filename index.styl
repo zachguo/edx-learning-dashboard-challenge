@@ -32,7 +32,7 @@ unselectable()
 
 labeltext()
   text-align center
-  font-size 16px
+  font-size 14px
   color color-text-content
 
 // main
@@ -43,6 +43,7 @@ body
   background-color color-bg-edx
   font-family 'Open Sans', Verdana, Geneva, sans-serif
   margin 0
+  font-size 14px
 
 // fake edX main navbar
 header
@@ -83,10 +84,17 @@ header
     center(600px)
   margin-top 100px
 
-.card
+#rcol, #lcol
   col(1/2)
   +below(800px)
     stack()
+
+#lcol + #rcol
+  +below(800px)
+    margin-top 25px
+
+.card
+  center()
   border-radius 5px
   background-color color-bg-card
   addborder('')
@@ -94,13 +102,13 @@ header
   padding 15px
 
 .card + .card
-  +below(800px)
-    margin-top 25px
+  margin-top 25px
 
 .card-header
   addborder('-bottom')
   color color-text-title
   font-weight 300
+  margin 0 0 10px 0
 
 .card-content
   color color-text-content
@@ -112,6 +120,7 @@ header
     labeltext()
     border none
     addborder('-bottom')
+    margin-bottom 10px
     appearance none
     -webkit-appearance none
     -moz-appearance none
@@ -148,6 +157,10 @@ svg
 
 .category-video
   fill color-secondary
+
+#leaderboard
+  table
+    font-size 12px
 
 .text-scores
   color color-bg-card
