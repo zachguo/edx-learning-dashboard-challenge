@@ -56,25 +56,31 @@ header
   addborder('-bottom')
   boxshadow()
 
-.main-nav
+.nav
   center(1200px)
   font-size 14px
   height 40px
   line-height 40px
-  span
-    display inline-block
 
-.logo
+.nav-logo
   padding 0 15px 0 15px
 
-.provider
+.nav-provider
   padding-left 15px
   addborder('-left')
   color color-text-title
   font-weight bold
   vertical-align text-bottom
 
-.course
+.nav-hide-on-small
+  +below(550px)
+    display none
+
+.nav-float-right
+  float right
+  padding-right 15px
+
+.nav-text
   color color-text-content
   vertical-align text-bottom
 
