@@ -11,7 +11,7 @@ color-text-title = #3C3C3C
 color-text-content = #666
 color-primary = #1D9DD9
 color-secondary = #BC2A6C
-color-success = #45D91D
+color-success = #A0D468
 color-error = #D9321D
 color-warning = #FFCE54
 
@@ -85,19 +85,20 @@ header
   vertical-align text-bottom
 
 // content
+
 .content
   center(1180px)
-  +below(800px)
+  +below(1000px)
     center(600px)
   margin-top 100px
 
 #rcol, #lcol
   col(1/2)
-  +below(800px)
+  +below(1000px)
     stack()
 
 #lcol + #rcol
-  +below(800px)
+  +below(1000px)
     margin-top 25px
 
 .card
@@ -138,6 +139,8 @@ svg
   center()
   unselectable()
 
+// progress chart
+
 #progress
   svg
     cursor pointer
@@ -164,6 +167,71 @@ svg
 
 .category-video
   fill color-secondary
+
+// timeline chart
+
+.curtain
+  fill color-bg-card
+
+.tl-active
+  fill color-success
+
+.tl-inactive
+  fill color-bg-edx
+
+.problem-line, .video-line
+  fill none
+  stroke-width 2
+
+.problem-line
+  stroke color-primary
+
+.video-line
+  stroke color-secondary
+
+.reference-line
+  stroke color-bg-edx
+
+.certificate-line
+  stroke color-success
+  stroke-dasharray 10,10
+
+.certificate-text, .reference-text
+  dominant-baseline hanging
+  font-size 10px
+
+.reference-text
+  fill color-bg-edx
+
+.certificate-text
+  fill color-success
+
+.reference-line, .certificate-line, .reference-text, .certificate-text
+  opacity 0.7
+
+.tooltip
+  background-color color-bg-card
+  color color-text-content
+  width 80px
+  height 85px
+  padding 4px
+  position absolute
+  z-index 1001
+  boxshadow()
+
+.tooltip-active
+  color color-success
+
+.tooltip-inactive
+  color color-bg-edx
+
+.tooltip-video
+  color color-secondary
+
+.tooltip-problem
+  color color-primary
+
+// leaderboard chart
 
 #leaderboard
   table

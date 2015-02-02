@@ -218,12 +218,44 @@ def generate_students_data(course_structure):
     return students, top10
 
 
+def generate_timeline_data():
+    # generate fake data for one student
+    from datetime import date, timedelta as td
+    from random import randint, random
+
+    def getdates(d1, d2):
+        delta = d2 - d1
+        video = 0.
+        problem = 0.
+        for i in range(delta.days + 1):
+            date = str(d1 + td(days=i))
+            active = randint(0, 1)
+            if active and video < 100 and problem < 100:
+                video_current = min(random() * 3, 100 - video)
+                problem_current = min(random() * 3, 100 - problem)
+                video += video_current
+                problem += problem_current
+            else:
+                video_current = problem_current = 0.
+            yield {"date": date,
+                   "active": active,
+                   "video": video,
+                   "videoPerDay": video_current,
+                   "problem": problem,
+                   "problemPerDay": problem_current}
+
+    return list(getdates(date(2018, 9, 15), date(2018, 12, 23)))
+
+
 if __name__ == "__main__":
     cs = generate_course_structure()
     s, top10 = generate_students_data(cs)
+    timeline = generate_timeline_data()
     with open("_courseStructure.json", "w") as fout:
         json.dump(cs, fout)
     with open("_students.json", "w") as fout:
         json.dump(s, fout)
     with open("_leaderboard.json", "w") as fout:
         json.dump(top10, fout)
+    with open("_punchline.json", "w") as fout:
+        json.dump(timeline, fout)
