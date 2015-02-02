@@ -113,7 +113,7 @@
       // rendering starts from 'overall' level
       render("overall");
 
-      function render(label) {
+      function render(label, isFGNotAnimated) {
 
         var donut = studentData.donut[label];
         var donutAvg = peerData.donut[label];
@@ -136,7 +136,7 @@
           defaultReportG.append("text")
             .attr("class", "percentage")
             .classed("category-" + category, true)
-            .call(percentageAnimated, report);
+            .call(showPercentage, report, isFGNotAnimated);
           // default report - peer comparison
           var diff = report - reportAvg;
           defaultReportG.append("text")
@@ -172,20 +172,7 @@
         arcs.append("path")
           .attr("class", "arc-fg")
           .classed("category-" + category, true)
-          // foreground arcs transite from outerRadius to innerRadius
-          .attr("d", d3.svg.arc()
-            .innerRadius(r)
-            .outerRadius(r))
-          .transition()
-          .duration(durationNormal)
-          .attrTween("d", function(d) {
-            var dStart = JSON.parse(JSON.stringify(d));
-            d.data = 0;
-            var i = d3.interpolateObject(d, dStart);
-            return function(t) {
-              return arcFG(i(t));
-            };
-          });
+          .call(showArcsFG, isFGNotAnimated);
 
         // colored outer arcs for peer comparison
         var arcComparison = d3.svg.arc()
@@ -232,20 +219,17 @@
         d3.select("#select-category").on("change", function() {
           category = this.value;
           studentData = data.getStudentData(studentID);
-          peerData = data.getPeerData(peerType);
           update(label);
         });
         d3.select("#select-student").on("change", function() {
           studentID = this.value;
           studentData = data.getStudentData(studentID);
-          peerData = data.getPeerData(peerType);
           update(label);
         });
         d3.select("#select-peer").on("change", function() {
           peerType = this.value;
-          studentData = data.getStudentData(studentID);
           peerData = data.getPeerData(peerType);
-          update(label);
+          update(label, true);
         });
 
         // show corresponding report & highlight hovered arc when hovering an arc *path*
@@ -281,22 +265,46 @@
         });
 
         // animation helpers
-        function percentageAnimated(selection, val) {
-          selection.text("0%")
-            .transition()
-            .duration(durationNormal)
-            .tween("text", function() {
-              var i = d3.interpolate(0, val);
-              return function(t) {
-                this.textContent = valToPercentString(i(t));
-              };
-            });
+        function showPercentage(selection, val, isNotAnimated) {
+          if (isNotAnimated) {
+            selection.text(valToPercentString(val));
+          } else {
+            selection.text("0%")
+              .transition()
+              .duration(durationNormal)
+              .tween("text", function() {
+                var i = d3.interpolate(0, val);
+                return function(t) {
+                  this.textContent = valToPercentString(i(t));
+                };
+              });
+          }
+        }
+
+        function showArcsFG(selection, isNotAnimated) {
+          if (isNotAnimated) {
+            selection.attr("d", arcFG);
+          } else { // foreground arcs transite from outerRadius to innerRadius
+            selection.attr("d", d3.svg.arc()
+                .innerRadius(r)
+                .outerRadius(r))
+              .transition()
+              .duration(durationNormal)
+              .attrTween("d", function(d) {
+                var dStart = JSON.parse(JSON.stringify(d));
+                d.data = 0;
+                var i = d3.interpolateObject(d, dStart);
+                return function(t) {
+                  return arcFG(i(t));
+                };
+              });
+          }
         }
 
         function slideOut(selection, translation) {
           selection.attr("opacity", 0)
             .transition()
-            .delay(durationNormal)
+            .delay(isFGNotAnimated ? 0 : durationNormal)
             .duration(durationShort)
             .attr("transform", "translate(" + translation + ")")
             .attr("opacity", 1);
@@ -346,9 +354,9 @@
       }
 
       // helpers
-      function update(label) {
+      function update(label, isFGNotAnimated) {
         render(null); // clean previous data to avoid data collision
-        render(label);
+        render(label, isFGNotAnimated);
         if (label === "overall") {
           hideHelpText();
         }
