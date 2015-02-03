@@ -26,6 +26,11 @@
     // rerender when window-size or select-option changes
     d3.select(window).on("resize", render);
     d3.select("#leaderboard").on("change", render);
+    // rehighlight oneself when student changes
+    d3.select("#select-student").on("change.leaderboard", function() {
+      table.selectAll("td")
+        .call(highlightOneself);
+    });
 
     function render() {
       table.selectAll("*").remove();
@@ -82,9 +87,21 @@
         .text(function(d) {
           return reformatScoreByLabel(d.value, label);
         });
+
+      rows.exit().remove();
+
+      // highlight oneself
+      rows.selectAll("td")
+        .call(highlightOneself);
     }
 
   });
+
+  function highlightOneself(selection) {
+    selection.classed("lb-oneself", function(d) {
+      return d.id == d3.select("#select-student").property("value");
+    });
+  }
 
   function reformatScoreByLabel(val, label) {
     switch (label) {
