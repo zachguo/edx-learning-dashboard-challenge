@@ -4,7 +4,7 @@
   var table = d3.select("#leaderboard")
     .append("table")
     .attr("width", "100%")
-    .attr("height", "100%");
+    .attr("height", "192px"); // fixed height for proper position on small screen
 
   d3.json("_leaderboard.json", function(top10) {
 
@@ -83,7 +83,7 @@
         .style("width", function(d) {
           return scaler(d.value) + "px";
         })
-        .attr("class", label)
+        .attr("class", labelToClassName(label))
         .text(function(d) {
           return reformatScoreByLabel(d.value, label);
         });
@@ -114,6 +114,10 @@
       case "top10_timespent":
         return Math.round(val / 60) + "h" + (val % 60) + "min";
     }
+  }
+
+  function labelToClassName(label) {
+    return "lb-" + label.replace("_", "-");
   }
 
   function labelToTitleText(label) {

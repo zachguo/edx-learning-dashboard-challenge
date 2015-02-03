@@ -204,8 +204,8 @@
             tooltipDiv.html(
               p(d.date) +
               p(whetherActive.toUpperCase(), whetherActive) +
-              p("V: " + d["video" + labelSuffix].toFixed(1) + "%", "video") +
-              p("P: " + d["problem" + labelSuffix].toFixed(1) + "%", "problem")
+              p("P: " + d["problem" + labelSuffix].toFixed(1) + "%", "problem") +
+              p("V: " + d["video" + labelSuffix].toFixed(1) + "%", "video")
             );
           })
           .on('mousemove.tooltip', function() {

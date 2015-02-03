@@ -1,7 +1,5 @@
 (function() {
 
-  // donut chart for visualizing student progress
-  // visualization codes only (*no data manipulation* in codes below)
   // build up skeleton for rendering
   var selector = d3.select("#progress"),
     svgSide = selector[0][0].offsetWidth,
@@ -75,7 +73,7 @@
       };
 
       data.getStudentData = function(id) {
-        return id ? this[id][category] : this[499][category];
+        return this[id][category];
       };
 
       // init selectbox for student ID
@@ -87,8 +85,11 @@
         .attr("value", function(d) {
           return d;
         })
+        .attr("selected", function(d) {
+          return d == 499;
+        })
         .text(function(d) {
-          return "student-" + d;
+          return "Student-" + d;
         });
 
       // init selectbox for peer type
@@ -393,7 +394,7 @@
       function peerTypeToTitleText(peerType) {
         switch (peerType) {
           case "avg":
-            return "all peers";
+            return "all students";
           case "top10_problem":
             return "10 students completed most problems";
           case "top10_video":
