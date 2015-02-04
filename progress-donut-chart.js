@@ -76,22 +76,6 @@
         return this[id][category];
       };
 
-      // init selectbox for student ID
-      d3.select("#select-student")
-        .selectAll("option")
-        .data(data.getIDs(isStudentID))
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-          return d;
-        })
-        .attr("selected", function(d) {
-          return d == 499;
-        })
-        .text(function(d) {
-          return "Student-" + d;
-        });
-
       // init selectbox for peer type
       d3.select("#select-peer")
         .selectAll("option")
