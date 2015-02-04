@@ -1,31 +1,36 @@
 (function() {
 
-  render();
+  d3.json("_timeline.json", function(activities) {
 
-  d3.select(window).on("resize.timeline", render);
+    render();
 
-  function render() {
+    d3.select(window).on("resize.timeline", render);
+    d3.select("#select-student").on("change.timeline", render);
 
-    var selector = d3.select("#timeline");
-    var width = selector[0][0].offsetWidth;
-    var height = d3.select(window)[0][0].outerWidth >= 1000 ? d3.select("#progress")[0][0].offsetHeight - 350 : width / 2;
+    function render() {
 
-    selector.selectAll("svg").remove();
+      var selector = d3.select("#timeline"),
+        width = selector[0][0].offsetWidth,
+        height = d3.select(window)[0][0].outerWidth >= 1000 ? d3.select("#progress")[0][0].offsetHeight - 350 : width / 2,
+        sid = d3.select("#select-student").property("value");
 
-    // init responsive svg
-    var svg = selector.append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      selector.selectAll("svg").remove();
 
-    d3.json("_punchline.json", function(activity) {
-      var numDays = activity.length,
+      // init responsive svg
+      var svg = selector.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      var activity = activities[sid],
+        numDays = activity.length,
         rectSide = width / numDays,
         lineChartHeight = height - rectSide,
-        duration = 1000;
+        duration = 1000,
+        perdayThreshold = 20;
 
       var y = d3.scale.linear()
         .range([lineChartHeight, 0]);
-      y = y.domain([0, getTimelineTypeSuffix() === "" ? 100 : 10]);
+      y = y.domain([0, getTimelineTypeSuffix() === "" ? 100 : perdayThreshold]);
 
       var days = svg.selectAll('.tl-day')
         .data(activity)
@@ -72,7 +77,7 @@
       });
       // add horizontal lines
       var hlineG = svg.selectAll(".reference")
-        .data([5, 10, 50, 100, 60])
+        .data([perdayThreshold/2, perdayThreshold, 50, 100, 60])
         .enter()
         .append("g")
         .attr("class", "reference");
@@ -89,7 +94,7 @@
           return getHlineType(d) + "-line";
         })
         .classed("perday", function(d) {
-          return d <= 10;
+          return d <= perdayThreshold;
         });
       hlineG.append("text")
         .attr("x", 0.5 * rectSide)
@@ -100,7 +105,7 @@
           return getHlineType(d) + "-text";
         })
         .classed("perday", function(d) {
-          return d <= 10;
+          return d <= perdayThreshold;
         })
         .text(function(d) {
           return d % 60 !== 0 ? d + "%" : d + "% Certification";
@@ -125,7 +130,7 @@
 
       function update() {
         // update y scale
-        y = y.domain([0, getTimelineTypeSuffix() === "" ? 100 : 10]);
+        y = y.domain([0, getTimelineTypeSuffix() === "" ? 100 : perdayThreshold]);
         // update reference lines height
         hlineG.selectAll("text")
           .transition()
@@ -229,7 +234,8 @@
 
       }
 
-    });
-  }
+    }
+
+  });
 
 })();

@@ -17,7 +17,8 @@ def clean(name):
 def generate_course_structure():
 
     def get_structure_from(filepath):
-        structure = {"children": {}, "parent": {}, "base": {}}
+        structure = {"children": {}, "parent": {}}
+        base = {}
 
         def check_n_append_child(key, child):
             if child not in structure["children"][key]:
@@ -37,7 +38,7 @@ def generate_course_structure():
                 id = clean(row["id"])
                 section = clean(row["section"])
                 subsection = clean(row["subsection"])
-                base = int(row["max_points"]) if "max_points" in row else int(row["duration_seconds"])
+                base_val = int(row["max_points"]) if "max_points" in row else int(row["duration_seconds"])
                 check_n_init_children("overall")
                 check_n_init_children(section)
                 check_n_init_children(subsection)
@@ -47,18 +48,19 @@ def generate_course_structure():
                 check_n_add_parent(section, "overall")
                 check_n_add_parent(subsection, section)
                 check_n_add_parent(id, subsection)
-                if subsection in structure["base"]:
-                    structure["base"][subsection][id] = base
+                if subsection in base:
+                    base[subsection][id] = base_val
                 else:
-                    structure["base"][subsection] = {id: base}
+                    base[subsection] = {id: base_val}
 
-        return structure
+        return structure, base
 
-    return {"video": get_structure_from(CSV_FOLDER_PATH + "videos.csv"),
-            "problem": get_structure_from(CSV_FOLDER_PATH + "problems.csv")}
+    video_structure, video_base = get_structure_from(CSV_FOLDER_PATH + "videos.csv")
+    problem_structure, problem_base = get_structure_from(CSV_FOLDER_PATH + "problems.csv")
+    return {"video": video_structure, "problem": problem_structure}, {"video": video_base, "problem": problem_base}
 
 
-def generate_students_data(course_structure):
+def generate_students_data(course_structure, base):
 
     students = {}
 
@@ -87,9 +89,9 @@ def generate_students_data(course_structure):
                 student_temp = course_structure[category]["children"].copy()
             for key in student_temp:
                 if key in current_student:
-                    vals = [current_student[key][x] if x in current_student[key] else [0, course_structure[category]["base"][key][x]] for x in student_temp[key]]
+                    vals = [current_student[key][x] if x in current_student[key] else [0, base[category][key][x]] for x in student_temp[key]]
                 elif key.startswith("lecture"):
-                    vals = [[0, course_structure[category]["base"][key][x]] for x in student_temp[key]]
+                    vals = [[0, base[category][key][x]] for x in student_temp[key]]
                 else:
                     vals = student_temp[key]
                 student_temp[key] = vals
@@ -218,44 +220,107 @@ def generate_students_data(course_structure):
     return students, top10
 
 
-def generate_timeline_data():
-    # generate fake data for one student
+def generate_timeline_data(base):
     from datetime import date, timedelta as td
-    from random import randint, random
 
     def getdates(d1, d2):
-        delta = d2 - d1
-        video = 0.
-        problem = 0.
-        for i in range(delta.days + 1):
+        for i in range((d2 - d1).days + 1):
             date = str(d1 + td(days=i))
-            active = randint(0, 1)
-            if active and video < 100 and problem < 100:
-                video_current = min(random() * 3, 100 - video)
-                problem_current = min(random() * 3, 100 - problem)
-                video += video_current
-                problem += problem_current
-            else:
-                video_current = problem_current = 0.
-            yield {"date": date,
-                   "active": active,
-                   "video": video,
-                   "videoPerDay": video_current,
-                   "problem": problem,
-                   "problemPerDay": problem_current}
+            yield [date, 0]
 
-    return list(getdates(date(2018, 9, 15), date(2018, 12, 23)))
+    dates_dict = dict(list(getdates(date(2018, 9, 15), date(2018, 12, 23))))
+    timeline = defaultdict(dict)
+
+    def empty_timeline():
+        return [0] * len(dates_dict.keys())
+
+    def get_timelime_data_from(filepath, category):
+        with open(filepath) as f:
+            reader = csv.DictReader(f)
+            if category == "problem":
+                score_colname, min_score = "score", 0
+            elif category == "video":
+                score_colname, min_score = "watched_seconds", 0
+            else:
+                score_colname, min_score = "minutes_on_site", 15
+            date_colname = filter(lambda x: x.startswith("date"), reader.fieldnames)[0]
+            for row in reader:
+                score = int(row[score_colname])
+                if score > min_score:
+                    sid = row["student_id"]
+                    date = row[date_colname]
+                    if sid not in timeline:
+                        timeline[sid] = {}
+                    if category not in timeline[sid]:
+                        timeline[sid][category] = dates_dict.copy()
+                    timeline[sid][category][date] += score
+        if category in ("problem", "video"):
+            denom = sum([sum(base[category][lec].values()) for lec in base[category]])
+            for sid in timeline:
+                if category in timeline[sid]:
+                    timeline[sid][category] = [v for k, v in sorted([(d, float(v) / denom) for d, v in timeline[sid][category].items()])]
+                else:
+                    timeline[sid][category] = empty_timeline()
+        else:
+            for sid in timeline:
+                if category in timeline[sid]:
+                    timeline[sid][category] = [int(v > 15) for d, v in sorted(timeline[sid][category].items())]
+                else:
+                    timeline[sid][category] = empty_timeline()
+
+    def perday2accumulated(category):
+        for sid in timeline:
+            if category in timeline[sid]:
+                val_current = 0
+                result = []
+                for v in timeline[sid][category]:
+                    val_current += v
+                    result.append(val_current)
+                timeline[sid][category + "A"] = result
+            else:
+                timeline[sid][category] = empty_timeline()
+                timeline[sid][category + "A"] = empty_timeline()
+
+    def round_timeline_floats(categories):
+        for sid in timeline:
+            for category in categories:
+                timeline[sid][category] = map(lambda x: round(x, 3) * 100, timeline[sid][category])
+
+    def reformat():
+        dates_list = sorted(dates_dict.keys())
+        for sid in timeline:
+            result = []
+            for i in range(len(dates_list)):
+                result.append({
+                    "date": dates_list[i],
+                    "problem": timeline[sid]['problemA'][i],
+                    "problemPerDay": timeline[sid]['problem'][i],
+                    "video": timeline[sid]['videoA'][i],
+                    "videoPerDay": timeline[sid]['video'][i],
+                    "active": timeline[sid]['active'][i]
+                })
+            timeline[sid] = result
+
+    get_timelime_data_from(CSV_FOLDER_PATH + "problem_attempts.csv", "problem")
+    get_timelime_data_from(CSV_FOLDER_PATH + "video_views.csv", "video")
+    get_timelime_data_from(CSV_FOLDER_PATH + "minutes_per_day.csv", "active")
+    perday2accumulated("problem")
+    perday2accumulated("video")
+    round_timeline_floats(["problem", "video", "problemA", "videoA"])
+    reformat()
+
+    return timeline
 
 
 if __name__ == "__main__":
-    cs = generate_course_structure()
-    s, top10 = generate_students_data(cs)
-    timeline = generate_timeline_data()
+    cs, base = generate_course_structure()
+    s, top10 = generate_students_data(cs, base)
+    timeline = generate_timeline_data(base)
     with open("_courseStructure.json", "w") as fout:
         json.dump(cs, fout)
     with open("_students.json", "w") as fout:
         json.dump(s, fout)
     with open("_leaderboard.json", "w") as fout:
         json.dump(top10, fout)
-    with open("_punchline.json", "w") as fout:
+    with open("_timeline.json", "w") as fout:
         json.dump(timeline, fout)
