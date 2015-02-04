@@ -41,8 +41,8 @@
     .attr("opacity", 0)
     .text("<");
 
-  d3.json("_courseStructure.json", function(structure) {
-    d3.json("_students.json", function(data) {
+  d3.json("data/_structure.json", function(structure) {
+    d3.json("data/_students.json", function(data) {
 
       // add some helper methods for data objects
       structure.getParent = function(label) {

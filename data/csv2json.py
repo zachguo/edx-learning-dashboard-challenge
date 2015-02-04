@@ -7,7 +7,7 @@ import csv
 import json
 from collections import defaultdict
 
-CSV_FOLDER_PATH = "../data/"
+CSV_FOLDER_PATH = "../../data/"
 
 
 def clean(name):
@@ -316,7 +316,7 @@ if __name__ == "__main__":
     cs, base = generate_course_structure()
     s, top10 = generate_students_data(cs, base)
     timeline = generate_timeline_data(base)
-    with open("_courseStructure.json", "w") as fout:
+    with open("_structure.json", "w") as fout:
         json.dump(cs, fout)
     with open("_students.json", "w") as fout:
         json.dump(s, fout)

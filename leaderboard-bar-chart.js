@@ -6,7 +6,7 @@
     .attr("width", "100%")
     .attr("height", "192px"); // fixed height for proper position on small screen
 
-  d3.json("_leaderboard.json", function(top10) {
+  d3.json("data/_leaderboard.json", function(top10) {
 
     // init selectbox options
     d3.select("#select-top10")
