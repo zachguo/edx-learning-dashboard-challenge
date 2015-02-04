@@ -39,6 +39,7 @@
   var helpText = backG.append("text")
     .attr("transform", "translate(0," + (-bandWidth * 2.5) + ")")
     .attr("opacity", 0)
+    .attr("class", "back-button")
     .text("<");
 
   d3.json("data/_structure.json", function(structure) {

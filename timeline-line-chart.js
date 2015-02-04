@@ -11,7 +11,7 @@
 
       var selector = d3.select("#timeline"),
         width = selector[0][0].offsetWidth,
-        height = d3.select(window)[0][0].outerWidth >= 1000 ? d3.select("#progress")[0][0].offsetHeight - 350 : width / 2,
+        height = d3.select(window)[0][0].outerWidth >= 1000 ? d3.select("#progress")[0][0].offsetHeight - 360 : width / 2,
         sid = d3.select("#select-student").property("value");
 
       selector.selectAll("svg").remove();
@@ -209,8 +209,8 @@
             tooltipDiv.html(
               p(d.date) +
               p(whetherActive.toUpperCase(), whetherActive) +
-              p("P: " + d["problem" + labelSuffix].toFixed(1) + "%", "problem") +
-              p("V: " + d["video" + labelSuffix].toFixed(1) + "%", "video")
+              p("Problem: " + d["problem" + labelSuffix].toFixed(1) + "%", "problem") +
+              p("Video: " + d["video" + labelSuffix].toFixed(1) + "%", "video")
             );
           })
           .on('mousemove.tooltip', function() {

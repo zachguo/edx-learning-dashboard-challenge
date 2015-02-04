@@ -84,13 +84,28 @@ header
   color color-text-content
   vertical-align text-bottom
 
+.nav-course
+  center(1200px)
+  height 70px
+  font-weight 700
+  line-height 14px
+  color color-text-title
+  padding 28px 0 0 28px
+  span
+    padding 8px 15px 8px 15px
+  .tab-active
+    color color-bg-card
+    border-radius 3px
+    background-image linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.25))
+    text-shadow 0px 1px 0px rgba(0, 0, 0, 0.4)
+
+
 // content
 
 .content
   center(1180px)
   +below(1000px)
     center(600px)
-  margin-top 100px
 
 #rcol, #lcol
   col(1/2)
@@ -103,11 +118,11 @@ header
 
 .card
   center()
-  border-radius 5px
+  border-radius 3px
   background-color color-bg-card
   addborder('')
   boxshadow()
-  padding 15px
+  padding 20px
 
 .card + .card
   margin-top 25px
@@ -154,6 +169,10 @@ svg
 
 .arc-comparison
   stroke color-bg-card
+
+.back-button
+  font-size 36px
+  font-weight 700
 
 .report-title
   font-size 22px
@@ -211,10 +230,11 @@ svg
 
 .tooltip
   background-color color-bg-card
+  font-size 12px
   color color-text-content
-  width 80px
-  height 85px
-  padding 4px
+  width 95px
+  height 75px
+  padding 3px
   position absolute
   z-index 1001
   boxshadow()
