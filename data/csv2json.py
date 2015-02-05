@@ -316,11 +316,11 @@ if __name__ == "__main__":
     cs, base = generate_course_structure()
     s, top10 = generate_students_data(cs, base)
     timeline = generate_timeline_data(base)
-    with open("_structure.json", "w") as fout:
+    with open("structure.json", "w") as fout:
         json.dump(cs, fout)
-    with open("_students.json", "w") as fout:
+    with open("students.json", "w") as fout:
         json.dump(s, fout)
-    with open("_leaderboard.json", "w") as fout:
+    with open("leaderboard.json", "w") as fout:
         json.dump(top10, fout)
-    with open("_timeline.json", "w") as fout:
+    with open("timeline.json", "w") as fout:
         json.dump(timeline, fout)

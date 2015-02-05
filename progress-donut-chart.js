@@ -42,8 +42,8 @@
     .attr("class", "back-button")
     .text("<");
 
-  d3.json("data/_structure.json", function(structure) {
-    d3.json("data/_students.json", function(data) {
+  d3.json("data/structure.json", function(structure) {
+    d3.json("data/students.json", function(data) {
 
       // add some helper methods for data objects
       structure.getParent = function(label) {

@@ -1,6 +1,6 @@
 (function() {
 
-  d3.json("data/_timeline.json", function(activities) {
+  d3.json("data/timeline.json", function(activities) {
 
     render();
 
