@@ -1,9 +1,6 @@
-# EdX Learning Dashboard
+# edX Learning Dashboard
 
-Submitted to [EdX Learning Dashboard Challenge](http://databits.io/challenges/edx-learning-dashboard-challenge) ([Demo](http://zachguo.github.io/edx-learning-dashboard-challenge))
-*- Siyuan Guo, Jan 2015*
-
-> The underlying dataset is several megabytes, so initial loading might be slow depending on your network condition. But the visualization should be quick and smooth once the dataset is loaded.
+> 1st Prize Winner for [edX Learning Dashboard Challenge 2015](https://open.edx.org/blog/edx-learning-dashboard-challenge) ([Live Demo](http://zachguo.github.io/edx-learning-dashboard-challenge))
 
 ## Overview
 
@@ -25,3 +22,6 @@ Submitted to [EdX Learning Dashboard Challenge](http://databits.io/challenges/ed
 - responsive design (though hover effects are limited on small touch screen)
 - tested working on latest Firefox, Chrome, Safari and IE
   - the width of svg is a bit off in Safari, causing by a `offsetWidth` bug (possible to be fixed by JQuery).
+
+## About edX
+[![](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/EdX.svg/200px-EdX.svg.png)](https://www.edx.org/)
